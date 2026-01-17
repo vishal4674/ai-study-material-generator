@@ -1,0 +1,256 @@
+<!-- ========== Template Extension ========== -->
+<!-- This template extends the base.html layout to inherit navigation, footer, and common structure -->
+{% extends "base.html" %}
+
+<!-- ========== Page Title Block ========== -->
+<!-- Set the browser tab title to show which file's flashcards are being viewed -->
+{% block title %}Flashcards - {{ material.filename }}{% endblock %}
+
+<!-- ========== Main Content Block ========== -->
+<!-- This is where the flashcard viewer and controls will appear -->
+{% block content %}
+<div class="container flashcard-container">
+    <!-- ========== Page Header Section ========== -->
+    <!-- Shows the page title, filename, and navigation back to dashboard -->
+    <div class="flashcard-header">
+        <h1><i class="fas fa-sticky-note"></i> Flashcards</h1>
+        <p class="subtitle">{{ material.filename }}</p>
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+
+    <!-- ========== Flashcard Display Section ========== -->
+    <!-- Check if there are any flashcards to display -->
+    {% if flashcards %}
+    
+    <!-- ========== Flashcard Controls Section ========== -->
+    <!-- Contains topic filter dropdown and card counter -->
+    <div class="flashcard-controls">
+        <!-- ========== Topic Filter Dropdown ========== -->
+        <!-- Allows users to filter flashcards by specific topics -->
+        <div class="filter-group">
+            <label>Filter by Topic:</label>
+            <select id="topicFilter" onchange="filterFlashcards()">
+                <!-- Option to show all flashcards -->
+                <option value="all">All Topics</option>
+                
+                <!-- Extract unique topics from flashcards and create options -->
+                {% set topics = flashcards | map(attribute='topic') | unique | list %}
+                {% for topic in topics %}
+                <option value="{{ topic }}">{{ topic }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- ========== Card Counter Display ========== -->
+        <!-- Shows which card number user is viewing out of total cards -->
+        <div class="card-counter">
+            <span id="currentCard">1</span> / <span id="totalCards">{{ flashcards|length }}</span>
+        </div>
+    </div>
+
+    <!-- ========== Flashcard Viewer Section ========== -->
+    <!-- Main area where the flashcard is displayed with flip animation -->
+    <div class="flashcard-viewer">
+        <!-- ========== Flashcard Element ========== -->
+        <!-- Clickable card that flips to show question or answer -->
+        <div class="flashcard" id="flashcard" onclick="flipCard()">
+            <!-- Inner container needed for 3D flip effect -->
+            <div class="flashcard-inner">
+                <!-- ========== Front Side (Question) ========== -->
+                <!-- Shows the question side of the flashcard -->
+                <div class="flashcard-front">
+                    <div class="card-type">Question</div>
+                    <!-- Question text content (updated dynamically by JavaScript) -->
+                    <div class="card-content" id="questionContent">
+                        {{ flashcards[0].question }}
+                    </div>
+                    <!-- Topic badge showing which topic this card belongs to -->
+                    <div class="card-topic">{{ flashcards[0].topic }}</div>
+                </div>
+                
+                <!-- ========== Back Side (Answer) ========== -->
+                <!-- Shows the answer side when card is flipped -->
+                <div class="flashcard-back">
+                    <div class="card-type">Answer</div>
+                    <!-- Answer text content (updated dynamically by JavaScript) -->
+                    <div class="card-content" id="answerContent">
+                        {{ flashcards[0].answer }}
+                    </div>
+                    <!-- Difficulty badge (easy, medium, or hard) -->
+                    <div class="card-difficulty">
+                        <span class="badge badge-{{ flashcards[0].difficulty }}">
+                            {{ flashcards[0].difficulty }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== Navigation Buttons ========== -->
+        <!-- Buttons to navigate between flashcards and flip current card -->
+        <div class="flashcard-navigation">
+            <!-- Previous card button -->
+            <button class="btn btn-nav" onclick="previousCard()">
+                <i class="fas fa-chevron-left"></i> Previous
+            </button>
+            <!-- Flip card button (alternative to clicking card) -->
+            <button class="btn btn-nav" onclick="flipCard()">
+                <i class="fas fa-sync-alt"></i> Flip Card
+            </button>
+            <!-- Next card button -->
+            <button class="btn btn-nav" onclick="nextCard()">
+                Next <i class="fas fa-chevron-right"></i>
+            </button>
+        </div>
+    </div>
+    
+    <!-- ========== Empty State Section ========== -->
+    <!-- Shown when there are no flashcards available for this material -->
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-sticky-note"></i>
+        <h2>No flashcards available</h2>
+    </div>
+    {% endif %}
+</div>
+
+<!-- ========== JavaScript Section ========== -->
+<!-- Inline JavaScript to handle flashcard functionality -->
+<script>
+    /**
+     * Flashcard Management System
+     * 
+     * This script handles all flashcard functionality:
+     * - Displaying flashcards one by one
+     * - Flipping cards to show answers
+     * - Navigating between cards (next/previous)
+     * - Filtering cards by topic
+     * - Keyboard shortcuts for navigation
+     */
+
+    // ========== Global Variables ==========
+    
+    // Get all flashcards from Flask template (converts Python list to JavaScript array)
+    const flashcards = {{ flashcards | tojson }};
+    
+    // Track which card we're currently showing (starts at first card)
+    let currentIndex = 0;
+    
+    // Copy of cards that can be filtered by topic
+    let filteredCards = [...flashcards];
+    
+    // Track if current card is showing answer side
+    let isFlipped = false;
+
+    // ========== Card Display Functions ==========
+
+    /**
+     * Update the displayed flashcard with new content.
+     * 
+     * This function refreshes the card display when user navigates to different card
+     * or when filters are applied. It updates the question, answer, and counter.
+     */
+    function updateCard() {
+        // Get the current card from filtered list
+        const card = filteredCards[currentIndex];
+        
+        // Update the text content on both sides of the card
+        document.getElementById('questionContent').textContent = card.question;
+        document.getElementById('answerContent').textContent = card.answer;
+        
+        // Update the card counter (e.g., "3 / 25")
+        document.getElementById('currentCard').textContent = currentIndex + 1;
+        document.getElementById('totalCards').textContent = filteredCards.length;
+        
+        // Always show question side when switching to new card
+        document.getElementById('flashcard').classList.remove('flipped');
+        isFlipped = false;
+    }
+
+    // ========== Card Interaction Functions ==========
+
+    /**
+     * Flip the flashcard to show question or answer side.
+     * 
+     * This creates the 3D flip effect to reveal the answer when user clicks card
+     * or presses spacebar. Can be called multiple times to flip back and forth.
+     */
+    function flipCard() {
+        // Toggle the 'flipped' CSS class which triggers the 3D rotation
+        document.getElementById('flashcard').classList.toggle('flipped');
+        
+        // Keep track of which side is currently showing
+        isFlipped = !isFlipped;
+    }
+
+    // ========== Navigation Functions ==========
+
+    /**
+     * Navigate to the next flashcard in the sequence.
+     * 
+     * Moves forward one card if there are more cards available.
+     */
+    function nextCard() {
+        // Check if there's a next card available
+        if (currentIndex < filteredCards.length - 1) {
+            currentIndex++;        // Move to next card
+            updateCard();          // Refresh display with new card
+        }
+    }
+
+    /**
+     * Navigate to the previous flashcard in the sequence.
+     * 
+     * Moves backward one card if not already at the first card.
+     */
+    function previousCard() {
+        // Check if there's a previous card available
+        if (currentIndex > 0) {
+            currentIndex--;        // Move to previous card
+            updateCard();          // Refresh display with new card
+        }
+    }
+
+    // ========== Filtering Functions ==========
+
+    /**
+     * Filter flashcards by topic to show only cards from selected topic.
+     * 
+     * This allows users to study specific topics by hiding cards from other topics.
+     * Automatically resets to first card after filtering.
+     */
+    function filterFlashcards() {
+        // Get the selected topic from dropdown
+        const topic = document.getElementById('topicFilter').value;
+        
+        if (topic === 'all') {
+            // Show all cards - restore original full list
+            filteredCards = [...flashcards];
+        } else {
+            // Filter to show only cards matching the selected topic
+            filteredCards = flashcards.filter(card => card.topic === topic);
+        }
+        
+        // Always go back to first card after applying filter
+        currentIndex = 0;
+        updateCard();
+    }
+
+    // ========== Keyboard Navigation ==========
+    
+    /**
+     * Enable keyboard shortcuts for flashcard navigation.
+     * 
+     * - Left Arrow: Previous card
+     * - Right Arrow: Next card
+     * - Spacebar: Flip current card
+     */
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'ArrowLeft') previousCard();      // Left arrow = previous
+        if (e.key === 'ArrowRight') nextCard();         // Right arrow = next
+        if (e.key === ' ') flipCard();                  // Spacebar = flip
+    });
+</script>
+{% endblock %}

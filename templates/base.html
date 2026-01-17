@@ -1,0 +1,78 @@
+<!-- ========== HTML Document Structure ========== -->
+<!-- This is the base template that all other pages extend from -->
+<!-- It provides the common structure: navigation bar, footer, and scripts -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- ========== Meta Tags ========== -->
+    <!-- Define character encoding and viewport settings for responsive design -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- ========== Page Title ========== -->
+    <!-- This block allows child templates to override the title -->
+    <title>{% block title %}AI Study Material Generator{% endblock %}</title>
+    
+    <!-- ========== CSS Stylesheets ========== -->
+    <!-- Link to our custom CSS file for styling the entire application -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    
+    <!-- Link to Font Awesome for icons (graduation cap, home, dashboard, etc.) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+
+<body>
+    <!-- ========== Navigation Bar Section ========== -->
+    <!-- Top navigation bar that appears on all pages -->
+    <!-- Provides links to main sections of the application -->
+    <nav class="navbar">
+        <div class="container">
+            <!-- ========== Brand/Logo Section ========== -->
+            <!-- Left side of navbar showing app name and icon -->
+            <div class="nav-brand">
+                <i class="fas fa-graduation-cap"></i>
+                <span>AI Study Generator</span>
+            </div>
+            
+            <!-- ========== Navigation Menu ========== -->
+            <!-- Right side of navbar with navigation links -->
+            <ul class="nav-menu">
+                <!-- Home page link - takes user to file upload page -->
+                <li><a href="{{ url_for('index') }}" class="nav-link"><i class="fas fa-home"></i> Home</a></li>
+                
+                <!-- Dashboard link - shows all uploaded materials -->
+                <li><a href="{{ url_for('dashboard') }}" class="nav-link"><i class="fas fa-dashboard"></i> Dashboard</a></li>
+                
+                <!-- Stats page link - displays application statistics -->
+                <li><a href="{{ url_for('stats_page') }}" class="nav-link"><i class="fas fa-chart-bar"></i> Stats</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- ========== Main Content Area ========== -->
+    <!-- This is where child templates inject their specific content -->
+    <!-- Each page (index, dashboard, flashcards, etc.) replaces this block -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- ========== Footer Section ========== -->
+    <!-- Bottom footer that appears on all pages with copyright info -->
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 AI Study Material Generator | Made with ❤️</p>
+        </div>
+    </footer>
+
+    <!-- ========== JavaScript Files ========== -->
+    <!-- Load main JavaScript file that handles common functionality -->
+    <!-- This includes: smooth scrolling, button animations, notifications -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    
+    <!-- ========== Additional Scripts Block ========== -->
+    <!-- Child templates can add their own specific scripts here -->
+    <!-- For example: flashcard.js for flashcard pages, d3.js for concept maps -->
+    {% block scripts %}{% endblock %}
+</body>
+</html>

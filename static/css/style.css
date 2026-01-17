@@ -1,0 +1,1026 @@
+/* ========== Global Styles - Basic Setup for All Elements ========== */
+/* Reset all default margins, padding, and set consistent box-sizing */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* ========== CSS Custom Properties - Color and Style Variables ========== */
+/* Define all colors and common values in one place for easy changes */
+:root {
+    --primary-color: #4CAF50;     /* Main green color for buttons, highlights */
+    --secondary-color: #2196F3;   /* Blue color for secondary elements */
+    --danger-color: #f44336;      /* Red color for delete buttons, errors */
+    --warning-color: #ff9800;     /* Orange color for warnings */
+    --success-color: #4CAF50;     /* Green color for success messages */
+    --dark-color: #333;           /* Dark text color */
+    --light-color: #f4f4f4;       /* Light background color */
+    --border-radius: 8px;         /* Standard border radius for rounded corners */
+    --box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);  /* Standard shadow effect */
+    --transition: all 0.3s ease;  /* Standard animation transition */
+}
+
+/* ========== Base Body Styling ========== */
+/* Set up the main font, colors, and layout for the entire page */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;  /* Modern, readable font */
+    line-height: 1.6;            /* Good spacing between lines for readability */
+    color: var(--dark-color);    /* Use dark color for all text */
+    background-color: #f9f9f9;   /* Light gray background for the page */
+}
+
+/* ========== Container Layout ========== */
+/* Standard container to center content and limit width on large screens */
+.container {
+    max-width: 1200px;   /* Don't let content get too wide on big screens */
+    margin: 0 auto;      /* Center the container horizontally */
+    padding: 20px;       /* Add space inside the container */
+}
+
+/* ========== Navigation Bar Styling ========== */
+/* Top navigation bar with gradient background and sticky positioning */
+.navbar {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); /* Green to blue gradient */
+    color: white;                 /* White text on colored background */
+    padding: 1rem 0;             /* Vertical padding for height */
+    box-shadow: var(--box-shadow);  /* Drop shadow below navbar */
+    position: sticky;             /* Stay at top when scrolling */
+    top: 0;                      /* Stick to the very top */
+    z-index: 1000;              /* Make sure it's above other content */
+}
+
+/* Navigation container layout - spread items across the width */
+.navbar .container {
+    display: flex;                    /* Use flexbox for layout */
+    justify-content: space-between;   /* Logo on left, menu on right */
+    align-items: center;              /* Vertically center items */
+}
+
+/* ========== Navigation Brand (Logo) Styling ========== */
+/* Style for the app name/logo on the left side of navbar */
+.nav-brand {
+    font-size: 1.5rem;    /* Larger text for prominence */
+    font-weight: bold;     /* Make it stand out */
+    display: flex;         /* Layout icon and text horizontally */
+    align-items: center;   /* Center icon and text vertically */
+    gap: 10px;            /* Space between icon and text */
+}
+
+.nav-brand i {
+    font-size: 1.8rem;    /* Make the icon slightly larger */
+}
+
+/* ========== Navigation Menu Styling ========== */
+/* Style for the navigation links on the right side */
+.nav-menu {
+    display: flex;         /* Layout menu items horizontally */
+    list-style: none;      /* Remove bullet points */
+    gap: 2rem;            /* Space between menu items */
+}
+
+/* Individual navigation link styling */
+.nav-link {
+    color: white;                    /* White text */
+    text-decoration: none;           /* Remove underline */
+    transition: var(--transition);   /* Smooth hover effects */
+    display: flex;                   /* Layout icon and text */
+    align-items: center;             /* Center vertically */
+    gap: 5px;                       /* Small space between icon and text */
+}
+
+/* Hover effect for navigation links */
+.nav-link:hover {
+    opacity: 0.8;                   /* Slightly transparent on hover */
+    transform: translateY(-2px);     /* Move up slightly for effect */
+}
+
+/* ========== Main Content Area ========== */
+/* Container for all page content below the navigation */
+.main-content {
+    min-height: calc(100vh - 180px);  /* Fill screen minus navbar and footer */
+    padding: 2rem 0;                  /* Vertical padding for breathing room */
+}
+
+/* ========== File Upload Section Styling ========== */
+/* Styling for the main upload page where users select files */
+
+/* Center the upload section on the page */
+.upload-container {
+    text-align: center;  /* Center all content horizontally */
+}
+
+/* Main upload box with white background and shadow */
+.upload-section {
+    background: white;                /* White background */
+    border-radius: var(--border-radius);  /* Rounded corners */
+    padding: 3rem;                   /* Generous padding inside */
+    box-shadow: var(--box-shadow);   /* Drop shadow for depth */
+    max-width: 800px;               /* Limit width */
+    margin: 0 auto;                 /* Center horizontally */
+}
+
+/* Header area with title and description */
+.upload-header {
+    margin-bottom: 2rem;  /* Space below header */
+}
+
+/* Large upload icon */
+.upload-icon {
+    font-size: 4rem;                /* Very large icon */
+    color: var(--primary-color);    /* Use primary green color */
+    margin-bottom: 1rem;            /* Space below icon */
+}
+
+/* Upload section title */
+.upload-header h1 {
+    font-size: 2rem;        /* Large title text */
+    margin-bottom: 0.5rem;  /* Small space below title */
+}
+
+/* Description text below title */
+.upload-header p {
+    color: #666;  /* Gray text for description */
+}
+
+/* ========== File Input Styling ========== */
+/* Custom styling for the file selection area */
+
+/* Container for the custom file input */
+.file-input-wrapper {
+    position: relative;  /* For positioning custom elements */
+    margin: 2rem 0;     /* Vertical spacing */
+}
+
+/* Hide the default file input (we'll create a custom one) */
+.file-input-wrapper input[type="file"] {
+    display: none;
+}
+
+/* Custom file input label that looks like a drop zone */
+.file-input-label {
+    display: block;                      /* Full width */
+    padding: 3rem;                      /* Generous padding */
+    border: 3px dashed var(--primary-color);  /* Dashed border */
+    border-radius: var(--border-radius);     /* Rounded corners */
+    cursor: pointer;                     /* Show it's clickable */
+    transition: var(--transition);       /* Smooth hover effects */
+    background: #f9f9f9;               /* Very light background */
+}
+
+/* Hover effect for the file drop zone */
+.file-input-label:hover {
+    background: #f0f0f0;              /* Darker on hover */
+    border-color: var(--secondary-color);  /* Change border to blue */
+}
+
+/* Icon inside the file drop zone */
+.file-input-label i {
+    font-size: 3rem;                  /* Large icon */
+    color: var(--primary-color);      /* Primary color */
+    display: block;                   /* Full width */
+    margin-bottom: 1rem;             /* Space below icon */
+}
+
+/* Text inside the file drop zone */
+.file-input-label span {
+    display: block;      /* Full width */
+    font-size: 1.2rem;   /* Larger than normal text */
+    color: #666;         /* Gray color */
+}
+
+/* ========== Upload Status Messages ========== */
+/* Styling for messages that appear during file upload */
+
+/* Base styling for all status messages */
+.upload-status {
+    margin: 1rem 0;                  /* Vertical spacing */
+    padding: 1rem;                   /* Internal padding */
+    border-radius: var(--border-radius);  /* Rounded corners */
+    font-weight: bold;               /* Bold text for emphasis */
+}
+
+/* Processing status (yellow/orange) */
+.status-processing {
+    background: #fff3cd;    /* Light yellow background */
+    color: #856404;         /* Dark yellow text */
+    border: 1px solid #ffeaa7;  /* Yellow border */
+}
+
+/* Success status (green) */
+.status-success {
+    background: #d4edda;    /* Light green background */
+    color: #155724;         /* Dark green text */
+    border: 1px solid #c3e6cb;  /* Green border */
+}
+
+/* Error status (red) */
+.status-error {
+    background: #f8d7da;    /* Light red background */
+    color: #721c24;         /* Dark red text */
+    border: 1px solid #f5c6cb;  /* Red border */
+}
+
+/* ========== Progress Bar Animation ========== */
+/* Animated progress bar shown during file processing */
+
+/* Container for the progress bar */
+.progress-bar {
+    width: 100%;           /* Full width */
+    height: 10px;          /* Thin height */
+    background: #e0e0e0;   /* Gray background */
+    border-radius: 10px;   /* Rounded ends */
+    overflow: hidden;      /* Hide overflow for smooth animation */
+    margin: 1rem 0;       /* Vertical spacing */
+}
+
+/* The moving part of the progress bar */
+.progress-fill {
+    height: 100%;                    /* Fill full height */
+    background: var(--primary-color);  /* Primary color */
+    animation: progress 2s infinite;   /* Animate continuously */
+}
+
+/* Animation for the progress bar movement */
+@keyframes progress {
+    0% { width: 0%; }      /* Start at 0% */
+    50% { width: 70%; }    /* Go to 70% */
+    100% { width: 100%; }  /* Finish at 100% */
+}
+
+/* ========== Features Section ========== */
+/* Showcase of app features on the upload page */
+
+/* Container for the features section */
+.features {
+    margin-top: 3rem;  /* Space above features */
+}
+
+/* Features section title */
+.features h2 {
+    margin-bottom: 2rem;           /* Space below title */
+    color: var(--dark-color);      /* Dark text color */
+}
+
+/* Grid layout for feature cards */
+.feature-grid {
+    display: grid;                                    /* CSS Grid layout */
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));  /* Responsive columns */
+    gap: 2rem;                                       /* Space between cards */
+    margin-top: 2rem;                               /* Space above grid */
+}
+
+/* Individual feature card styling */
+.feature-card {
+    padding: 2rem;                      /* Internal padding */
+    background: white;                  /* White background */
+    border-radius: var(--border-radius);   /* Rounded corners */
+    box-shadow: var(--box-shadow);     /* Drop shadow */
+    transition: var(--transition);      /* Smooth hover effects */
+}
+
+/* Hover effect for feature cards */
+.feature-card:hover {
+    transform: translateY(-5px);                    /* Move up on hover */
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);   /* Stronger shadow */
+}
+
+/* Icon in each feature card */
+.feature-card i {
+    font-size: 2.5rem;               /* Large icon */
+    color: var(--primary-color);     /* Primary color */
+    margin-bottom: 1rem;            /* Space below icon */
+}
+
+/* Feature card title */
+.feature-card h3 {
+    margin-bottom: 0.5rem;  /* Small space below title */
+}
+
+/* Feature card description */
+.feature-card p {
+    color: #666;  /* Gray text */
+}
+
+/* ========== Dashboard Page Styling ========== */
+/* Layout and styling for the materials dashboard */
+
+/* Header area of the dashboard with title and search */
+.dashboard-header {
+    display: flex;              /* Flexbox layout */
+    justify-content: space-between;  /* Spread items apart */
+    align-items: center;        /* Center vertically */
+    margin-bottom: 2rem;       /* Space below header */
+    flex-wrap: wrap;           /* Wrap on small screens */
+    gap: 1rem;                /* Space between wrapped items */
+}
+
+/* Dashboard title with icon */
+.dashboard-header h1 {
+    display: flex;        /* Layout icon and text */
+    align-items: center;  /* Center vertically */
+    gap: 10px;           /* Space between icon and text */
+}
+
+/* ========== Search Bar Styling ========== */
+/* Search functionality in the dashboard */
+
+/* Container for search bar */
+.search-bar {
+    flex: 1;          /* Take remaining space */
+    max-width: 400px; /* Don't get too wide */
+}
+
+/* Search form layout */
+.search-bar form {
+    display: flex;    /* Layout input and button horizontally */
+    gap: 0.5rem;     /* Small space between input and button */
+}
+
+/* Search input field */
+.search-bar input {
+    flex: 1;                         /* Take most of the space */
+    padding: 0.7rem;                /* Internal padding */
+    border: 1px solid #ddd;         /* Light border */
+    border-radius: var(--border-radius);  /* Rounded corners */
+    font-size: 1rem;                /* Normal text size */
+}
+
+/* Search button */
+.search-bar button {
+    padding: 0.7rem 1.5rem;         /* Padding for good size */
+    background: var(--primary-color);  /* Primary color background */
+    color: white;                    /* White text */
+    border: none;                    /* Remove border */
+    border-radius: var(--border-radius);  /* Rounded corners */
+    cursor: pointer;                 /* Show it's clickable */
+    transition: var(--transition);   /* Smooth hover effects */
+}
+
+/* Search button hover effect */
+.search-bar button:hover {
+    background: #45a049;  /* Darker green on hover */
+}
+
+/* ========== Materials Grid Layout ========== */
+/* Grid of material cards in the dashboard */
+
+/* Grid container for material cards */
+.materials-grid {
+    display: grid;                                    /* CSS Grid layout */
+    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));  /* Responsive columns */
+    gap: 2rem;                                       /* Space between cards */
+}
+
+/* Individual material card */
+.material-card {
+    background: white;                  /* White background */
+    border-radius: var(--border-radius);   /* Rounded corners */
+    padding: 1.5rem;                  /* Internal padding */
+    box-shadow: var(--box-shadow);     /* Drop shadow */
+    transition: var(--transition);      /* Smooth hover effects */
+}
+
+/* Material card hover effect */
+.material-card:hover {
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);  /* Stronger shadow on hover */
+}
+
+/* ========== Material Card Header ========== */
+/* Top section of each material card with file info */
+
+/* Header layout with icon and file info */
+.material-header {
+    display: flex;              /* Horizontal layout */
+    gap: 1rem;                 /* Space between icon and info */
+    margin-bottom: 1rem;       /* Space below header */
+    padding-bottom: 1rem;      /* Padding below content */
+    border-bottom: 2px solid #f0f0f0;  /* Border line separator */
+}
+
+/* File type icon */
+.file-icon {
+    font-size: 2.5rem;               /* Large icon */
+    color: var(--primary-color);     /* Primary color */
+}
+
+/* File information text */
+.material-info h3 {
+    font-size: 1.1rem;        /* Slightly larger text */
+    margin-bottom: 0.5rem;     /* Space below filename */
+    word-break: break-word;    /* Break long filenames */
+}
+
+/* Upload date text */
+.upload-date {
+    font-size: 0.9rem;   /* Smaller text */
+    color: #666;          /* Gray color */
+}
+
+/* ========== Material Statistics ========== */
+/* Show counts of flashcards, summaries, etc. */
+
+/* Container for statistics */
+.material-stats {
+    display: flex;      /* Horizontal layout */
+    gap: 2rem;         /* Space between stats */
+    margin: 1rem 0;    /* Vertical spacing */
+}
+
+/* Individual statistic item */
+.stat {
+    display: flex;        /* Layout icon and text */
+    align-items: center;  /* Center vertically */
+    gap: 0.5rem;         /* Small space between icon and text */
+    color: #666;         /* Gray text color */
+}
+
+/* Statistic icons */
+.stat i {
+    color: var(--secondary-color);  /* Blue color for icons */
+}
+
+/* ========== Material Actions ========== */
+/* Buttons and actions for each material card */
+
+/* Container for action buttons */
+.material-actions {
+    display: flex;          /* Vertical layout */
+    flex-direction: column; /* Stack buttons vertically */
+    gap: 0.5rem;          /* Small space between buttons */
+    margin: 1rem 0;       /* Vertical spacing */
+}
+
+/* ========== Download Section ========== */
+/* Expandable download options */
+
+/* Container for download section */
+.download-section {
+    margin-top: 1rem;  /* Space above section */
+}
+
+/* Button to toggle download options */
+.btn-download-toggle {
+    width: 100%;                       /* Full width */
+    padding: 0.7rem;                   /* Internal padding */
+    background: #f0f0f0;              /* Light gray background */
+    border: none;                      /* Remove border */
+    border-radius: var(--border-radius);  /* Rounded corners */
+    cursor: pointer;                   /* Show it's clickable */
+    transition: var(--transition);     /* Smooth hover effects */
+    font-weight: bold;                /* Bold text */
+}
+
+/* Download toggle button hover */
+.btn-download-toggle:hover {
+    background: #e0e0e0;  /* Darker gray on hover */
+}
+
+/* Container for download links (hidden/shown on click) */
+.download-options {
+    margin-top: 0.5rem;               /* Small space above */
+    padding: 1rem;                    /* Internal padding */
+    background: #f9f9f9;             /* Very light background */
+    border-radius: var(--border-radius);  /* Rounded corners */
+}
+
+/* Individual download links */
+.download-options a {
+    display: block;                   /* Full width */
+    padding: 0.5rem;                 /* Internal padding */
+    color: var(--secondary-color);    /* Blue color */
+    text-decoration: none;            /* Remove underline */
+    transition: var(--transition);    /* Smooth hover effects */
+}
+
+/* Download link hover effect */
+.download-options a:hover {
+    background: #e0e0e0;      /* Gray background on hover */
+    border-radius: 4px;       /* Small rounded corners */
+}
+
+/* ========== Empty State Styling ========== */
+/* Shown when no materials are available */
+
+/* Container for empty state message */
+.empty-state {
+    text-align: center;               /* Center content */
+    padding: 4rem 2rem;              /* Large padding */
+    background: white;                /* White background */
+    border-radius: var(--border-radius);  /* Rounded corners */
+    box-shadow: var(--box-shadow);   /* Drop shadow */
+}
+
+/* Large icon for empty state */
+.empty-state i {
+    font-size: 4rem;     /* Very large icon */
+    color: #ccc;         /* Light gray color */
+    margin-bottom: 1rem; /* Space below icon */
+}
+
+/* Empty state title */
+.empty-state h2 {
+    margin-bottom: 1rem;  /* Space below title */
+    color: #666;         /* Gray text */
+}
+
+/* ========== Button Styles ========== */
+/* Reusable button styling for the entire app */
+
+/* Base button styling */
+.btn {
+    padding: 0.7rem 1.5rem;          /* Standard padding */
+    border: none;                     /* Remove border */
+    border-radius: var(--border-radius);  /* Rounded corners */
+    cursor: pointer;                  /* Show it's clickable */
+    font-size: 1rem;                 /* Standard font size */
+    transition: var(--transition);    /* Smooth hover effects */
+    text-decoration: none;            /* Remove underline if it's a link */
+    display: inline-flex;             /* Layout content horizontally */
+    align-items: center;              /* Center content vertically */
+    gap: 0.5rem;                     /* Space between icon and text */
+    justify-content: center;          /* Center content horizontally */
+}
+
+/* Primary button (green) */
+.btn-primary {
+    background: var(--primary-color);  /* Primary green color */
+    color: white;                      /* White text */
+}
+
+.btn-primary:hover {
+    background: #45a049;              /* Darker green on hover */
+    transform: translateY(-2px);      /* Move up slightly */
+}
+
+/* Secondary button (blue) */
+.btn-secondary {
+    background: var(--secondary-color);  /* Blue color */
+    color: white;                       /* White text */
+}
+
+.btn-secondary:hover {
+    background: #1976D2;  /* Darker blue on hover */
+}
+
+/* Danger button (red) for delete actions */
+.btn-danger {
+    background: var(--danger-color);  /* Red color */
+    color: white;                     /* White text */
+}
+
+.btn-danger:hover {
+    background: #da190b;  /* Darker red on hover */
+}
+
+/* Info button (teal) */
+.btn-info {
+    background: #17a2b8;  /* Teal color */
+    color: white;         /* White text */
+}
+
+.btn-info:hover {
+    background: #138496;  /* Darker teal on hover */
+}
+
+/* Small button variation */
+.btn-small {
+    padding: 0.5rem 1rem;  /* Less padding */
+    font-size: 0.9rem;     /* Smaller text */
+}
+
+/* Upload button (full width) */
+.btn-upload {
+    width: 100%;         /* Full width */
+    padding: 1rem;       /* More padding */
+    font-size: 1.1rem;   /* Larger text */
+    font-weight: bold;   /* Bold text */
+}
+
+/* Delete button (full width) */
+.btn-delete {
+    width: 100%;       /* Full width */
+    margin-top: 1rem;  /* Space above */
+}
+
+/* ========== Flashcard Viewer Styling ========== */
+/* Styling for the interactive flashcard interface */
+
+/* Container for flashcard viewer */
+.flashcard-container {
+    max-width: 900px;  /* Limit width */
+    margin: 0 auto;    /* Center horizontally */
+}
+
+/* Header area of flashcard page */
+.flashcard-header {
+    text-align: center;     /* Center content */
+    margin-bottom: 2rem;    /* Space below header */
+}
+
+.flashcard-header h1 {
+    margin-bottom: 0.5rem;  /* Small space below title */
+}
+
+/* Subtitle text */
+.subtitle {
+    color: #666;           /* Gray text */
+    font-size: 1.1rem;     /* Slightly larger text */
+    margin-bottom: 1rem;   /* Space below */
+}
+
+/* Controls for flashcard filtering and navigation */
+.flashcard-controls {
+    display: flex;                    /* Horizontal layout */
+    justify-content: space-between;   /* Spread items apart */
+    align-items: center;              /* Center vertically */
+    margin-bottom: 2rem;             /* Space below controls */
+    padding: 1rem;                   /* Internal padding */
+    background: white;                /* White background */
+    border-radius: var(--border-radius);  /* Rounded corners */
+    box-shadow: var(--box-shadow);   /* Drop shadow */
+}
+
+/* Filter dropdown group */
+.filter-group {
+    display: flex;        /* Horizontal layout */
+    align-items: center;  /* Center vertically */
+    gap: 0.5rem;         /* Small space between label and dropdown */
+}
+
+/* Filter dropdown styling */
+.filter-group select {
+    padding: 0.5rem;                  /* Internal padding */
+    border: 1px solid #ddd;          /* Light border */
+    border-radius: var(--border-radius);  /* Rounded corners */
+    font-size: 1rem;                 /* Standard text size */
+}
+
+/* Card counter display */
+.card-counter {
+    font-size: 1.2rem;               /* Larger text */
+    font-weight: bold;               /* Bold text */
+    color: var(--primary-color);     /* Primary color */
+}
+
+/* ========== Flashcard 3D Flip Animation ========== */
+/* Complex CSS for 3D card flipping effect */
+
+/* Container for 3D perspective */
+.flashcard-viewer {
+    perspective: 1000px;  /* Set 3D perspective for child elements */
+}
+
+/* The flashcard itself */
+.flashcard {
+    width: 100%;           /* Full width */
+    height: 400px;         /* Fixed height */
+    position: relative;    /* For absolute positioning of children */
+    cursor: pointer;       /* Show it's clickable */
+    margin-bottom: 2rem;   /* Space below card */
+}
+
+/* Inner container for the flip animation */
+.flashcard-inner {
+    width: 100%;                    /* Full width */
+    height: 100%;                   /* Full height */
+    position: relative;             /* For absolute positioning of children */
+    transition: transform 0.6s;     /* Smooth flip animation */
+    transform-style: preserve-3d;   /* Preserve 3D positioning */
+}
+
+/* Apply rotation when card is flipped */
+.flashcard.flipped .flashcard-inner {
+    transform: rotateY(180deg);  /* Rotate to show back */
+}
+
+/* Both sides of the flashcard */
+.flashcard-front,
+.flashcard-back {
+    width: 100%;                    /* Full width */
+    height: 100%;                   /* Full height */
+    position: absolute;             /* Position on top of each other */
+    backface-visibility: hidden;    /* Hide back side when not visible */
+    display: flex;                  /* Flex layout for content */
+    flex-direction: column;         /* Vertical layout */
+    justify-content: center;        /* Center content vertically */
+    align-items: center;            /* Center content horizontally */
+    padding: 2rem;                  /* Internal padding */
+    border-radius: var(--border-radius);  /* Rounded corners */
+    box-shadow: var(--box-shadow);  /* Drop shadow */
+}
+
+/* Front side styling (question) */
+.flashcard-front {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);  /* Purple gradient */
+    color: white;  /* White text */
+}
+
+/* Back side styling (answer) */
+.flashcard-back {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);  /* Pink gradient */
+    color: white;              /* White text */
+    transform: rotateY(180deg); /* Pre-rotated to face correct direction */
+}
+
+/* Card type label (Question/Answer) */
+.card-type {
+    font-size: 0.9rem;        /* Small text */
+    text-transform: uppercase; /* ALL CAPS */
+    letter-spacing: 2px;      /* Space between letters */
+    margin-bottom: 1rem;      /* Space below */
+    opacity: 0.8;            /* Slightly transparent */
+}
+
+/* Main content area of the card */
+.card-content {
+    font-size: 1.5rem;        /* Large text */
+    text-align: center;       /* Center text */
+    flex: 1;                  /* Take remaining space */
+    display: flex;            /* Flex layout */
+    align-items: center;      /* Center vertically */
+    justify-content: center;  /* Center horizontally */
+}
+
+/* Topic and difficulty badges */
+.card-topic,
+.card-difficulty {
+    margin-top: 1rem;  /* Space above */
+}
+
+/* ========== Badge Styling ========== */
+/* Small colored labels for difficulty levels */
+
+/* Base badge styling */
+.badge {
+    padding: 0.3rem 0.8rem;  /* Small padding */
+    border-radius: 20px;     /* Very rounded corners */
+    font-size: 0.8rem;       /* Small text */
+    font-weight: bold;       /* Bold text */
+}
+
+/* Easy difficulty badge (green) */
+.badge-easy {
+    background: #4CAF50;  /* Green background */
+}
+
+/* Medium difficulty badge (orange) */
+.badge-medium {
+    background: #ff9800;  /* Orange background */
+}
+
+/* Hard difficulty badge (red) */
+.badge-hard {
+    background: #f44336;  /* Red background */
+}
+
+/* ========== Flashcard Navigation ========== */
+/* Buttons to navigate between flashcards */
+
+/* Container for navigation buttons */
+.flashcard-navigation {
+    display: flex;          /* Horizontal layout */
+    justify-content: center; /* Center buttons */
+    gap: 1rem;             /* Space between buttons */
+}
+
+/* Navigation button styling */
+.btn-nav {
+    padding: 1rem 2rem;  /* Large padding */
+    font-size: 1rem;     /* Standard text size */
+}
+
+/* ========== Summary Page Styling ========== */
+/* Layout for document summary display */
+
+/* Container for summary content */
+.summary-container {
+    max-width: 900px;  /* Limit width */
+    margin: 0 auto;    /* Center horizontally */
+}
+
+/* Summary page header */
+.summary-header {
+    text-align: center;     /* Center content */
+    margin-bottom: 2rem;    /* Space below */
+}
+
+/* Grid of summary statistics */
+.summary-stats {
+    display: grid;                                    /* CSS Grid layout */
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));  /* Responsive columns */
+    gap: 1.5rem;                                     /* Space between items */
+    margin-bottom: 2rem;                            /* Space below grid */
+}
+
+/* Individual statistic box */
+.stat-box {
+    background: white;                  /* White background */
+    padding: 1.5rem;                   /* Internal padding */
+    border-radius: var(--border-radius);   /* Rounded corners */
+    box-shadow: var(--box-shadow);     /* Drop shadow */
+    display: flex;                     /* Horizontal layout */
+    align-items: center;               /* Center vertically */
+    gap: 1rem;                        /* Space between icon and text */
+}
+
+/* Statistic box icon */
+.stat-box i {
+    font-size: 2.5rem;               /* Large icon */
+    color: var(--primary-color);     /* Primary color */
+}
+
+/* Statistic number */
+.stat-box h3 {
+    font-size: 2rem;         /* Large number */
+    margin-bottom: 0.3rem;   /* Small space below */
+}
+
+/* Statistic label */
+.stat-box p {
+    color: #666;  /* Gray text */
+}
+
+/* Summary text and key points sections */
+.summary-section,
+.key-points-section {
+    background: white;                  /* White background */
+    padding: 2rem;                     /* Internal padding */
+    border-radius: var(--border-radius);   /* Rounded corners */
+    box-shadow: var(--box-shadow);     /* Drop shadow */
+    margin-bottom: 2rem;              /* Space below */
+}
+
+/* Section headers */
+.summary-section h2,
+.key-points-section h2 {
+    display: flex;                   /* Layout icon and text */
+    align-items: center;             /* Center vertically */
+    gap: 0.5rem;                    /* Small space between icon and text */
+    margin-bottom: 1rem;            /* Space below header */
+    color: var(--primary-color);    /* Primary color */
+}
+
+/* Summary text styling */
+.summary-text {
+    line-height: 1.8;      /* Good line spacing for reading */
+    font-size: 1.1rem;     /* Slightly larger text */
+    color: #444;          /* Dark gray text */
+}
+
+/* Key points list styling */
+.key-points-list {
+    list-style: none;  /* Remove bullet points */
+}
+
+/* Individual key point items */
+.key-points-list li {
+    display: flex;                         /* Layout icon and text */
+    gap: 1rem;                            /* Space between icon and text */
+    padding: 1rem 0;                      /* Vertical padding */
+    border-bottom: 1px solid #f0f0f0;     /* Light border between items */
+}
+
+/* Remove border from last item */
+.key-points-list li:last-child {
+    border-bottom: none;
+}
+
+/* Key point icons */
+.key-points-list i {
+    color: var(--success-color);  /* Green check color */
+    margin-top: 0.2rem;          /* Slight adjustment for alignment */
+}
+
+/* ========== Concept Map Styling ========== */
+/* Visual concept relationship display */
+
+/* Container for concept map */
+.concept-map-container {
+    max-width: 1200px;  /* Wide container for visualization */
+    margin: 0 auto;     /* Center horizontally */
+}
+
+/* Concept map page header */
+.concept-map-header {
+    text-align: center;     /* Center content */
+    margin-bottom: 2rem;    /* Space below */
+}
+
+/* Layout for concept visualization and topics list */
+.concept-visualization {
+    display: grid;               /* CSS Grid layout */
+    grid-template-columns: 2fr 1fr;  /* Main area takes 2/3, sidebar takes 1/3 */
+    gap: 2rem;                  /* Space between columns */
+}
+
+/* Container for the interactive graph */
+#graph-container {
+    background: white;                  /* White background */
+    border-radius: var(--border-radius);   /* Rounded corners */
+    box-shadow: var(--box-shadow);     /* Drop shadow */
+    padding: 1rem;                     /* Internal padding */
+    min-height: 600px;                /* Minimum height */
+}
+
+/* Sidebar with topics list */
+.topics-list {
+    background: white;                  /* White background */
+    border-radius: var(--border-radius);   /* Rounded corners */
+    box-shadow: var(--box-shadow);     /* Drop shadow */
+    padding: 1.5rem;                   /* Internal padding */
+    height: fit-content;               /* Adjust height to content */
+}
+
+/* Topics list header */
+.topics-list h3 {
+    margin-bottom: 1rem;             /* Space below header */
+    color: var(--primary-color);     /* Primary color */
+}
+
+/* Topics list styling */
+.topics-list ul {
+    list-style: none;  /* Remove bullet points */
+}
+
+/* Individual topic items */
+.topics-list li {
+    padding: 0.7rem;                     /* Internal padding */
+    margin-bottom: 0.5rem;              /* Space below each item */
+    background: #f9f9f9;                /* Light background */
+    border-radius: var(--border-radius); /* Rounded corners */
+    display: flex;                       /* Layout icon and text */
+    align-items: center;                 /* Center vertically */
+    gap: 0.5rem;                        /* Small space between icon and text */
+}
+
+/* Topic item icons */
+.topics-list i {
+    color: var(--secondary-color);  /* Blue color */
+}
+
+/* ========== Footer Styling ========== */
+/* Bottom footer section */
+
+/* Footer container */
+.footer {
+    background: var(--dark-color);  /* Dark background */
+    color: white;                   /* White text */
+    text-align: center;             /* Center content */
+    padding: 1.5rem 0;             /* Vertical padding */
+    margin-top: 3rem;              /* Space above footer */
+}
+
+/* ========== Responsive Design ========== */
+/* Mobile and tablet adaptations */
+
+/* Styles for screens smaller than 768px (tablets and phones) */
+@media (max-width: 768px) {
+    /* Stack navigation items vertically on small screens */
+    .navbar .container {
+        flex-direction: column;  /* Vertical layout */
+        gap: 1rem;              /* Space between items */
+    }
+
+    /* Stack navigation menu vertically */
+    .nav-menu {
+        flex-direction: column;  /* Vertical layout */
+        gap: 0.5rem;           /* Small space between items */
+        text-align: center;     /* Center text */
+    }
+
+    /* Stack dashboard header items vertically */
+    .dashboard-header {
+        flex-direction: column;  /* Vertical layout */
+    }
+
+    /* Search bar takes full width */
+    .search-bar {
+        max-width: 100%;  /* Full width */
+    }
+
+    /* Single column for material cards */
+    .materials-grid {
+        grid-template-columns: 1fr;  /* One column only */
+    }
+
+    /* Single column for concept visualization */
+    .concept-visualization {
+        grid-template-columns: 1fr;  /* Stack vertically */
+    }
+
+    /* Single column for feature grid */
+    .feature-grid {
+        grid-template-columns: 1fr;  /* One column only */
+    }
+
+    /* Smaller flashcard height on mobile */
+    .flashcard {
+        height: 350px;  /* Reduced height */
+    }
+
+    /* Smaller text in flashcard content */
+    .card-content {
+        font-size: 1.2rem;  /* Smaller than desktop */
+    }
+}

@@ -1,0 +1,336 @@
+<!-- ========== Template Extension ========== -->
+<!-- This template extends the base.html layout to inherit navigation, footer, and common structure -->
+{% extends "base.html" %}
+
+<!-- ========== Page Title Block ========== -->
+<!-- Set the browser tab title for the statistics page -->
+{% block title %}Statistics - AI Study Generator{% endblock %}
+
+<!-- ========== Main Content Block ========== -->
+<!-- This is where the statistics dashboard content will appear -->
+{% block content %}
+<div class="container stats-container">
+    <!-- ========== Statistics Header Section ========== -->
+    <!-- Shows the page title and subtitle describing the page purpose -->
+    <div class="stats-header">
+        <h1><i class="fas fa-chart-bar"></i> Overall Statistics</h1>
+        <p class="subtitle">Your learning progress at a glance</p>
+    </div>
+
+    <!-- ========== Statistics Cards Grid ========== -->
+    <!-- Three main statistic cards showing total counts -->
+    <div class="stats-grid">
+        <!-- ========== Total Materials Card ========== -->
+        <!-- Shows how many files have been uploaded -->
+        <div class="stat-card stat-primary">
+            <div class="stat-icon">
+                <i class="fas fa-folder"></i>
+            </div>
+            <div class="stat-info">
+                <!-- Number will be updated by JavaScript from API -->
+                <h2 id="totalMaterials">0</h2>
+                <p>Total Materials</p>
+            </div>
+        </div>
+
+        <!-- ========== Total Flashcards Card ========== -->
+        <!-- Shows total number of flashcards generated -->
+        <div class="stat-card stat-success">
+            <div class="stat-icon">
+                <i class="fas fa-sticky-note"></i>
+            </div>
+            <div class="stat-info">
+                <!-- Number will be updated by JavaScript from API -->
+                <h2 id="totalFlashcards">0</h2>
+                <p>Total Flashcards</p>
+            </div>
+        </div>
+
+        <!-- ========== Total Summaries Card ========== -->
+        <!-- Shows total number of summaries created -->
+        <div class="stat-card stat-info">
+            <div class="stat-icon">
+                <i class="fas fa-file-alt"></i>
+            </div>
+            <div class="stat-info">
+                <!-- Number will be updated by JavaScript from API -->
+                <h2 id="totalSummaries">0</h2>
+                <p>Total Summaries</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== Recent Activity Section ========== -->
+    <!-- Shows the 5 most recently uploaded materials -->
+    <div class="recent-activity">
+        <h2><i class="fas fa-clock"></i> Recent Activity</h2>
+        <!-- Container will be filled by JavaScript with recent materials -->
+        <div class="activity-list" id="recentMaterials">
+            <!-- Will be populated by JavaScript -->
+        </div>
+    </div>
+
+    <!-- ========== Action Buttons Section ========== -->
+    <!-- Quick links to upload new material or view dashboard -->
+    <div class="action-buttons">
+        <!-- Upload button - takes user to file upload page -->
+        <a href="{{ url_for('index') }}" class="btn btn-primary">
+            <i class="fas fa-upload"></i> Upload New Material
+        </a>
+        <!-- Dashboard button - takes user to materials dashboard -->
+        <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">
+            <i class="fas fa-dashboard"></i> View Dashboard
+        </a>
+    </div>
+</div>
+
+<!-- ========== Inline CSS Styles ========== -->
+<!-- Custom styling specific to the statistics page -->
+<style>
+    /* ========== Main Container ========== */
+    /* Center the stats page and limit width */
+    .stats-container {
+        max-width: 1200px;     /* Don't get too wide on large screens */
+        margin: 0 auto;        /* Center horizontally */
+    }
+
+    /* ========== Header Section Styles ========== */
+    /* Style the page header with title and subtitle */
+    .stats-header {
+        text-align: center;    /* Center all text */
+        margin-bottom: 3rem;   /* Space below header */
+    }
+
+    /* Style the main heading with icon */
+    .stats-header h1 {
+        display: flex;              /* Use flexbox for layout */
+        align-items: center;        /* Center items vertically */
+        justify-content: center;    /* Center items horizontally */
+        gap: 1rem;                 /* Space between icon and text */
+        margin-bottom: 0.5rem;     /* Small space below heading */
+    }
+
+    /* ========== Statistics Grid Layout ========== */
+    /* Grid layout for the three stat cards */
+    .stats-grid {
+        display: grid;                                      /* Use CSS Grid */
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));  /* Responsive columns */
+        gap: 2rem;                                         /* Space between cards */
+        margin-bottom: 3rem;                               /* Space below grid */
+    }
+
+    /* ========== Individual Stat Card Styles ========== */
+    /* Style for each statistic card (materials, flashcards, summaries) */
+    .stat-card {
+        background: white;              /* White background */
+        border-radius: 12px;            /* Rounded corners */
+        padding: 2rem;                  /* Internal spacing */
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);  /* Drop shadow */
+        display: flex;                  /* Flexbox layout */
+        align-items: center;            /* Center items vertically */
+        gap: 1.5rem;                   /* Space between icon and info */
+        transition: transform 0.3s ease;  /* Smooth hover animation */
+    }
+
+    /* Hover effect for stat cards - lifts card up */
+    .stat-card:hover {
+        transform: translateY(-5px);              /* Move up 5px */
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);  /* Stronger shadow on hover */
+    }
+
+    /* ========== Stat Card Icon Styles ========== */
+    /* Circular icon container for each stat card */
+    .stat-icon {
+        width: 80px;                    /* Fixed width */
+        height: 80px;                   /* Fixed height (makes it a circle) */
+        border-radius: 50%;             /* Make it circular */
+        display: flex;                  /* Flexbox to center icon */
+        align-items: center;            /* Center vertically */
+        justify-content: center;        /* Center horizontally */
+        font-size: 2rem;               /* Large icon size */
+    }
+
+    /* Purple gradient for primary stat card (materials) */
+    .stat-primary .stat-icon {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;                   /* White icon color */
+    }
+
+    /* Blue-green gradient for success stat card (flashcards) */
+    .stat-success .stat-icon {
+        background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+        color: white;                   /* White icon color */
+    }
+
+    /* Pink-blue gradient for info stat card (summaries) */
+    .stat-info .stat-icon {
+        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
+        color: white;                   /* White icon color */
+    }
+
+    /* ========== Stat Card Number and Label ========== */
+    /* Large number display in stat cards */
+    .stat-info h2 {
+        font-size: 3rem;               /* Very large font */
+        margin-bottom: 0.5rem;         /* Space below number */
+        font-weight: bold;             /* Make it bold */
+    }
+
+    /* Label text below the number */
+    .stat-info p {
+        color: #666;                   /* Gray color */
+        font-size: 1.1rem;            /* Slightly larger than normal */
+    }
+
+    /* ========== Recent Activity Section Styles ========== */
+    /* Container for the recent activity list */
+    .recent-activity {
+        background: white;              /* White background */
+        border-radius: 12px;            /* Rounded corners */
+        padding: 2rem;                  /* Internal spacing */
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);  /* Drop shadow */
+        margin-bottom: 2rem;            /* Space below section */
+    }
+
+    /* Recent activity section heading */
+    .recent-activity h2 {
+        display: flex;                  /* Flexbox for icon and text */
+        align-items: center;            /* Center vertically */
+        gap: 0.5rem;                   /* Small space between icon and text */
+        margin-bottom: 1.5rem;         /* Space below heading */
+        color: var(--primary-color);   /* Use primary theme color */
+    }
+
+    /* ========== Activity List Styles ========== */
+    /* Container for activity items */
+    .activity-list {
+        display: flex;                  /* Flexbox layout */
+        flex-direction: column;         /* Stack items vertically */
+        gap: 1rem;                     /* Space between items */
+    }
+
+    /* Individual activity item (shows one uploaded material) */
+    .activity-item {
+        display: flex;                  /* Flexbox layout */
+        justify-content: space-between; /* Spread items apart */
+        align-items: center;            /* Center vertically */
+        padding: 1rem;                  /* Internal spacing */
+        background: #f9f9f9;           /* Light gray background */
+        border-radius: 8px;             /* Rounded corners */
+        transition: background 0.3s ease;  /* Smooth hover effect */
+    }
+
+    /* Hover effect for activity items - darken background */
+    .activity-item:hover {
+        background: #f0f0f0;           /* Slightly darker gray on hover */
+    }
+
+    /* Material filename in activity list */
+    .activity-name {
+        font-weight: bold;              /* Make it stand out */
+        color: var(--dark-color);      /* Dark text color */
+    }
+
+    /* Upload date in activity list */
+    .activity-date {
+        color: #666;                    /* Gray text */
+        font-size: 0.9rem;             /* Slightly smaller font */
+    }
+
+    /* ========== Action Buttons Section ========== */
+    /* Container for action buttons at bottom of page */
+    .action-buttons {
+        display: flex;                  /* Flexbox layout */
+        justify-content: center;        /* Center buttons horizontally */
+        gap: 1rem;                     /* Space between buttons */
+        margin-top: 2rem;              /* Space above buttons */
+    }
+
+    /* ========== Empty State Styles ========== */
+    /* Shown when there are no recent materials to display */
+    .empty-activity {
+        text-align: center;             /* Center text */
+        padding: 2rem;                  /* Generous padding */
+        color: #999;                    /* Light gray text */
+    }
+</style>
+
+<!-- ========== JavaScript Section ========== -->
+<!-- Script to fetch and display statistics from the API -->
+<script>
+    /**
+     * Statistics Dashboard JavaScript
+     * 
+     * This script handles loading and displaying statistics:
+     * - Fetches overall stats from API (total materials, flashcards, summaries)
+     * - Loads recent materials list
+     * - Updates the page with real data
+     * - Handles empty states when no data exists
+     */
+
+    // ========== Main Stats Loading Function ==========
+    
+    /**
+     * Load statistics data from the API and update the page.
+     * 
+     * This function:
+     * 1. Fetches overall stats (totals) from /api/stats endpoint
+     * 2. Updates the stat cards with real numbers
+     * 3. Fetches recent materials from /api/materials endpoint
+     * 4. Displays the 5 most recent materials in the activity list
+     * 5. Shows empty state if no materials exist
+     */
+    async function loadStats() {
+        try {
+            // ========== Fetch Overall Statistics ==========
+            // Get total counts from the stats API endpoint
+            const response = await fetch('/api/stats');
+            const stats = await response.json();
+            
+            // ========== Update Stat Cards ==========
+            // Fill in the numbers in the three stat cards
+            document.getElementById('totalMaterials').textContent = stats.total_materials;
+            document.getElementById('totalFlashcards').textContent = stats.total_flashcards;
+            document.getElementById('totalSummaries').textContent = stats.total_summaries;
+            
+            // ========== Fetch Recent Materials ==========
+            // Get list of all materials to show recent activity
+            const materialsResponse = await fetch('/api/materials');
+            const materials = await materialsResponse.json();
+            
+            // Get the container where we'll display recent materials
+            const recentContainer = document.getElementById('recentMaterials');
+            
+            // ========== Handle Empty State ==========
+            // If no materials have been uploaded yet, show empty message
+            if (materials.length === 0) {
+                recentContainer.innerHTML = '<div class="empty-activity">No materials uploaded yet</div>';
+            } else {
+                // ========== Display Recent Materials ==========
+                // Show the 5 most recent materials in the activity list
+                recentContainer.innerHTML = materials.slice(0, 5).map(material => `
+                    <div class="activity-item">
+                        <div>
+                            <!-- File icon (PDF icon for all files) -->
+                            <i class="fas fa-file-pdf" style="color: var(--primary-color); margin-right: 0.5rem;"></i>
+                            <!-- Material filename -->
+                            <span class="activity-name">${material.filename}</span>
+                        </div>
+                        <!-- Upload date formatted as readable date -->
+                        <span class="activity-date">${new Date(material.upload_date).toLocaleDateString()}</span>
+                    </div>
+                `).join('');
+            }
+            
+        } catch (error) {
+            // ========== Error Handling ==========
+            // If something goes wrong, log the error to console
+            console.error('Error loading stats:', error);
+        }
+    }
+
+    // ========== Initialize on Page Load ==========
+    // Call loadStats() as soon as the page is ready
+    loadStats();
+</script>
+{% endblock %}

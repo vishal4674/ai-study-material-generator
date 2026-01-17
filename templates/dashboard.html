@@ -1,0 +1,196 @@
+<!-- ========== Template Extension ========== -->
+<!-- This template extends the base.html layout to inherit navigation, footer, and common structure -->
+{% extends "base.html" %}
+
+<!-- ========== Page Title Block ========== -->
+<!-- Set the browser tab title for the dashboard page -->
+{% block title %}Dashboard - AI Study Generator{% endblock %}
+
+<!-- ========== Main Content Block ========== -->
+<!-- This is where the dashboard content will appear -->
+{% block content %}
+<div class="container dashboard-container">
+    <!-- ========== Dashboard Header Section ========== -->
+    <!-- Shows the page title and search bar for finding materials -->
+    <div class="dashboard-header">
+        <h1><i class="fas fa-dashboard"></i> Your Study Materials</h1>
+        
+        <!-- ========== Search Bar ========== -->
+        <!-- Allows users to search materials by topic name -->
+        <div class="search-bar">
+            <form action="{{ url_for('search') }}" method="get">
+                <!-- Search input field that remembers previous search query -->
+                <input type="text" name="q" placeholder="Search by topic..." value="{{ query or '' }}">
+                <!-- Search submit button -->
+                <button type="submit"><i class="fas fa-search"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <!-- ========== Materials Display Section ========== -->
+    <!-- Check if there are any materials to display -->
+    {% if materials %}
+    <div class="materials-grid">
+        <!-- ========== Material Cards Loop ========== -->
+        <!-- Loop through each uploaded material and display it as a card -->
+        {% for material in materials %}
+        <div class="material-card">
+            <!-- ========== Material Card Header ========== -->
+            <!-- Shows file icon, filename, and upload date -->
+            <div class="material-header">
+                <!-- File type icon (PDF, Word, or generic file) -->
+                <div class="file-icon">
+                    {% if material.file_type == 'pdf' %}
+                    <i class="fas fa-file-pdf"></i>
+                    {% elif material.file_type == 'docx' %}
+                    <i class="fas fa-file-word"></i>
+                    {% else %}
+                    <i class="fas fa-file-alt"></i>
+                    {% endif %}
+                </div>
+                <!-- File information (name and upload date) -->
+                <div class="material-info">
+                    <h3>{{ material.filename }}</h3>
+                    <p class="upload-date">{{ material.upload_date }}</p>
+                </div>
+            </div>
+
+            <!-- ========== Material Statistics ========== -->
+            <!-- Shows count of flashcards and summaries generated -->
+            <div class="material-stats">
+                <!-- Flashcard count -->
+                <div class="stat">
+                    <i class="fas fa-sticky-note"></i>
+                    <span>{{ material.flashcard_count }} Cards</span>
+                </div>
+                <!-- Summary count -->
+                <div class="stat">
+                    <i class="fas fa-file-alt"></i>
+                    <span>{{ material.summary_count }} Summary</span>
+                </div>
+            </div>
+
+            <!-- ========== Material Action Buttons ========== -->
+            <!-- Buttons to view different types of study materials -->
+            <div class="material-actions">
+                <!-- View Flashcards button - takes user to flashcard viewer -->
+                <a href="{{ url_for('view_flashcards', material_id=material.id) }}" class="btn btn-small btn-primary">
+                    <i class="fas fa-eye"></i> View Flashcards
+                </a>
+                <!-- View Summary button - shows document summary -->
+                <a href="{{ url_for('view_summary', material_id=material.id) }}" class="btn btn-small btn-secondary">
+                    <i class="fas fa-file-alt"></i> Summary
+                </a>
+                <!-- View Concept Map button - displays topic relationship graph -->
+                <a href="{{ url_for('view_concept_map', material_id=material.id) }}" class="btn btn-small btn-info">
+                    <i class="fas fa-project-diagram"></i> Concept Map
+                </a>
+            </div>
+
+            <!-- ========== Download Section ========== -->
+            <!-- Expandable section with download options for different file formats -->
+            <div class="download-section">
+                <!-- Toggle button to show/hide download options -->
+                <button class="btn-download-toggle" onclick="toggleDownloads({{ material.id }})">
+                    <i class="fas fa-download"></i> Downloads
+                </button>
+                <!-- Hidden download options list (shown when toggle button is clicked) -->
+                <div id="downloads-{{ material.id }}" class="download-options" style="display: none;">
+                    <!-- Download flashcards as JSON file -->
+                    <a href="{{ url_for('download_file', file_type='flashcards_json', material_id=material.id) }}">
+                        <i class="fas fa-file-code"></i> Flashcards (JSON)
+                    </a>
+                    <!-- Download flashcards as CSV file (for Excel, Google Sheets) -->
+                    <a href="{{ url_for('download_file', file_type='flashcards_csv', material_id=material.id) }}">
+                        <i class="fas fa-file-csv"></i> Flashcards (CSV)
+                    </a>
+                    <!-- Download summary as JSON file -->
+                    <a href="{{ url_for('download_file', file_type='summary', material_id=material.id) }}">
+                        <i class="fas fa-file-alt"></i> Summary (JSON)
+                    </a>
+                </div>
+            </div>
+
+            <!-- ========== Delete Button ========== -->
+            <!-- Button to permanently delete this material and all its generated content -->
+            <button class="btn btn-danger btn-delete" onclick="deleteMaterial({{ material.id }})">
+                <i class="fas fa-trash"></i> Delete
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- ========== Empty State Section ========== -->
+    <!-- Shown when user has no uploaded materials yet -->
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-inbox"></i>
+        <h2>No materials yet</h2>
+        <p>Upload your first file to get started!</p>
+        <!-- Button to take user to upload page -->
+        <a href="{{ url_for('index') }}" class="btn btn-primary">
+            <i class="fas fa-upload"></i> Upload File
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+
+<!-- ========== JavaScript Section ========== -->
+<!-- Custom scripts specific to the dashboard page -->
+{% block scripts %}
+<script>
+    /**
+     * Toggle the visibility of download options for a material card.
+     * 
+     * Shows or hides the list of download links when user clicks
+     * the "Downloads" button on a material card.
+     * 
+     * @param {number} materialId - ID of the material to toggle downloads for
+     */
+    function toggleDownloads(materialId) {
+        // Get the download options element for this material
+        const downloads = document.getElementById(`downloads-${materialId}`);
+        
+        // Toggle between showing and hiding (switch display between 'none' and 'block')
+        downloads.style.display = downloads.style.display === 'none' ? 'block' : 'none';
+    }
+
+    /**
+     * Delete a material and all its associated data.
+     * 
+     * Asks user for confirmation, then sends a delete request to the server.
+     * If successful, reloads the page to show updated material list.
+     * 
+     * @param {number} materialId - ID of the material to delete
+     */
+    async function deleteMaterial(materialId) {
+        // Ask user to confirm deletion (returns true if user clicks OK)
+        if (!confirm('Are you sure you want to delete this material?')) {
+            return;  // Exit if user cancels
+        }
+
+        try {
+            // Send POST request to server to delete the material
+            const response = await fetch(`/delete/${materialId}`, {
+                method: 'POST'
+            });
+
+            // Parse the JSON response from server
+            const result = await response.json();
+
+            // Check if deletion was successful
+            if (result.success) {
+                // Reload the page to show updated list without deleted material
+                location.reload();
+            } else {
+                // Show error message if deletion failed
+                alert('Failed to delete material');
+            }
+        } catch (error) {
+            // Show error message if network request failed
+            alert('Error: ' + error.message);
+        }
+    }
+</script>
+{% endblock %}

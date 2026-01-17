@@ -1,0 +1,217 @@
+<!-- ========== Template Extension ========== -->
+<!-- This template extends the base.html layout to inherit navigation, footer, and common structure -->
+{% extends "base.html" %}
+
+<!-- ========== Page Title Block ========== -->
+<!-- Set the browser tab title for the upload page -->
+{% block title %}Upload File - AI Study Generator{% endblock %}
+
+<!-- ========== Main Content Block ========== -->
+<!-- This is where the file upload form and feature showcase will appear -->
+{% block content %}
+<div class="container upload-container">
+    <!-- ========== Upload Section Container ========== -->
+    <!-- Main white box containing the entire upload interface -->
+    <div class="upload-section">
+        <!-- ========== Upload Header Section ========== -->
+        <!-- Shows the page title, icon, and supported file types -->
+        <div class="upload-header">
+            <!-- Large cloud upload icon -->
+            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+            <!-- Main page heading -->
+            <h1>Upload Your Study Material</h1>
+            <!-- Description of supported file formats -->
+            <p>Support for PDF, TXT, DOCX and VIDEO files (MP4, AVI, MOV)</p>
+        </div>
+
+        <!-- ========== Upload Form Section ========== -->
+        <!-- Contains the file input, submit button, and status displays -->
+        <div class="upload-form">
+            <!-- Form that will handle file upload (enctype needed for file uploads) -->
+            <form id="uploadForm" enctype="multipart/form-data">
+                <!-- ========== File Input Area ========== -->
+                <!-- Custom styled file input with drag-and-drop support -->
+                <div class="file-input-wrapper">
+                    <!-- Hidden file input (we style the label instead) -->
+                    <!-- Accept attribute limits which file types can be selected -->
+                    <input type="file" id="fileInput" name="file" accept=".pdf,.txt,.docx,.mp4,.avi,.mov,.mkv,.webm" required>
+                    
+                    <!-- Custom styled label that acts as the visible file input -->
+                    <label for="fileInput" class="file-input-label">
+                        <!-- Upload icon -->
+                        <i class="fas fa-file-upload"></i>
+                        <!-- Text that changes when file is selected -->
+                        <span id="fileName">Choose a file or drag here</span>
+                    </label>
+                </div>
+
+                <!-- ========== Submit Button ========== -->
+                <!-- Button to start processing the uploaded file -->
+                <button type="submit" class="btn btn-primary btn-upload">
+                    <i class="fas fa-magic"></i> Generate Study Materials
+                </button>
+            </form>
+
+            <!-- ========== Upload Status Display ========== -->
+            <!-- Hidden by default, shows processing status, success, or error messages -->
+            <div id="uploadStatus" class="upload-status" style="display: none;"></div>
+            
+            <!-- ========== Progress Bar ========== -->
+            <!-- Hidden by default, shows animated progress during file processing -->
+            <div id="progressBar" class="progress-bar" style="display: none;">
+                <div class="progress-fill"></div>
+            </div>
+        </div>
+
+        <!-- ========== Features Showcase Section ========== -->
+        <!-- Shows users what study materials they'll get after upload -->
+        <div class="features">
+            <h2>What You'll Get:</h2>
+            
+            <!-- ========== Feature Cards Grid ========== -->
+            <!-- Grid layout showing 4 main features of the app -->
+            <div class="feature-grid">
+                <!-- Feature Card 1: Flashcards -->
+                <div class="feature-card">
+                    <i class="fas fa-sticky-note"></i>
+                    <h3>Flashcards</h3>
+                    <p>Auto-generated Q&A cards</p>
+                </div>
+                
+                <!-- Feature Card 2: Summaries -->
+                <div class="feature-card">
+                    <i class="fas fa-file-alt"></i>
+                    <h3>Summaries</h3>
+                    <p>Key points extracted</p>
+                </div>
+                
+                <!-- Feature Card 3: Concept Maps -->
+                <div class="feature-card">
+                    <i class="fas fa-project-diagram"></i>
+                    <h3>Concept Maps</h3>
+                    <p>Visual topic relationships</p>
+                </div>
+                
+                <!-- Feature Card 4: Learning Path -->
+                <div class="feature-card">
+                    <i class="fas fa-route"></i>
+                    <h3>Learning Path</h3>
+                    <p>Personalized study plan</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+<!-- ========== JavaScript Section ========== -->
+<!-- Custom scripts specific to the upload page -->
+{% block scripts %}
+<script>
+    /**
+     * File Upload Handler
+     * 
+     * This script manages the entire file upload process:
+     * - Showing selected filename
+     * - Uploading file to server
+     * - Displaying progress and status
+     * - Handling success and error cases
+     * - Redirecting to dashboard after success
+     */
+
+    // ========== Get DOM Elements ==========
+    // Get references to all the important elements we'll need
+    const uploadForm = document.getElementById('uploadForm');        // The form element
+    const fileInput = document.getElementById('fileInput');          // Hidden file input
+    const fileName = document.getElementById('fileName');            // Text showing filename
+    const uploadStatus = document.getElementById('uploadStatus');    // Status message box
+    const progressBar = document.getElementById('progressBar');      // Progress bar element
+
+    // ========== File Selection Handler ==========
+    
+    /**
+     * Handle file input change event.
+     * 
+     * When user selects a file, update the label text to show
+     * the selected filename instead of "Choose a file".
+     */
+    fileInput.addEventListener('change', function() {
+        // Check if any file is selected
+        if (this.files.length > 0) {
+            // Update the text to show the selected filename
+            fileName.textContent = this.files[0].name;
+        }
+    });
+
+    // ========== Form Submit Handler ==========
+    
+    /**
+     * Handle form submission and file upload.
+     * 
+     * This function:
+     * 1. Prevents default form submission
+     * 2. Creates FormData with the selected file
+     * 3. Shows progress bar and status
+     * 4. Sends file to server via AJAX
+     * 5. Handles response (success or error)
+     * 6. Redirects to dashboard on success
+     */
+    uploadForm.addEventListener('submit', async function(e) {
+        // Prevent default form submission (we'll handle it with JavaScript)
+        e.preventDefault();
+
+        // Create FormData object to send the file
+        const formData = new FormData();
+        formData.append('file', fileInput.files[0]);
+
+        // ========== Show Progress Indicators ==========
+        // Make progress bar visible
+        progressBar.style.display = 'block';
+        
+        // Make status box visible with processing message
+        uploadStatus.style.display = 'block';
+        uploadStatus.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing your file...';
+        uploadStatus.className = 'upload-status status-processing';
+
+        // ========== Send File to Server ==========
+        try {
+            // Send POST request to /upload endpoint with the file
+            const response = await fetch('/upload', {
+                method: 'POST',
+                body: formData
+            });
+
+            // Parse the JSON response from server
+            const result = await response.json();
+
+            // ========== Handle Success Response ==========
+            if (result.success) {
+                // Update status to show success with statistics
+                uploadStatus.innerHTML = `
+                    <i class="fas fa-check-circle"></i> Success! 
+                    Generated ${result.stats.flashcards} flashcards, 
+                    ${result.stats.topics} topics
+                `;
+                uploadStatus.className = 'upload-status status-success';
+
+                // Wait 2 seconds, then redirect to dashboard
+                setTimeout(() => {
+                    window.location.href = '/dashboard';
+                }, 2000);
+            } else {
+                // If server returns success=false, throw error with message
+                throw new Error(result.error || 'Upload failed');
+            }
+        } catch (error) {
+            // ========== Handle Error ==========
+            // Show error message to user
+            uploadStatus.innerHTML = `<i class="fas fa-exclamation-circle"></i> Error: ${error.message}`;
+            uploadStatus.className = 'upload-status status-error';
+        } finally {
+            // ========== Clean Up ==========
+            // Hide progress bar when done (success or error)
+            progressBar.style.display = 'none';
+        }
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,21 @@
+Flask==3.0.0
+PyPDF2==3.0.1
+python-docx==1.1.0
+pandas==2.1.4
+nltk==3.8.1
+spacy==3.7.2
+transformers==4.36.2
+torch
+sentence-transformers
+werkzeug==3.0.1
+
+# Video Processing - Compatible versions
+moviepy==1.0.3
+opencv-python==4.9.0.80  # Change to compatible version
+SpeechRecognition==3.10.0
+pydub==0.25.1
+youtube-transcript-api==0.6.1
+yt-dlp==2024.1.1
+
+# NumPy - Compatible with all
+numpy==1.26.4
