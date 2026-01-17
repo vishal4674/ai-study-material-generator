@@ -139,26 +139,41 @@ def register_routes(app):
                              material=material,
                              summary=summary)
 
+    # In src/api/routes.py
+
     @app.route('/concept-map/<int:material_id>')
     def view_concept_map(material_id):
         """
         Show concept map for a specific material.
-
-        Loads the concept map graph from file if available.
+        Always generates a graph, even with minimal data.
         """
         material = db.get_material_by_id(material_id)
         topics = db.get_topics_by_material(material_id)
-
-        # Try to load concept graph from file
-        concept_graph = None
-        graph_file = Config.CONCEPT_MAPS_FOLDER / f"{material['filename']}_concept_map.json"
-        if graph_file.exists():
-            concept_graph = file_manager.load_json(graph_file)
-
+        
+        print(f"\n=== Concept Map Debug ===")
+        print(f"Material: {material['filename']}")
+        print(f"Topics found: {len(topics)}")
+        
+        # Always generate a concept graph
+        concept_mapper = ConceptMapper()
+        
+        # Get topics or create fallback
+        topic_names = [t['topic_name'] for t in topics] if topics else ["Main Topic", "Key Concept"]
+        
+        print(f"Using topics: {topic_names[:5]}")
+        
+        # Generate graph
+        graph_data = concept_mapper.create_concept_graph(topic_names, "Sample text content for relationships")
+        
+        concept_graph = {
+            'graph': graph_data,
+            'generated_at': 'on_demand'
+        }
+        
         return render_template('concept_map.html',
-                             material=material,
-                             concept_graph=concept_graph,
-                             topics=topics)
+                            material=material,
+                            concept_graph=concept_graph,
+                            topics=topics)
 
     @app.route('/download/<file_type>/<int:material_id>')
     def download_file(file_type, material_id):

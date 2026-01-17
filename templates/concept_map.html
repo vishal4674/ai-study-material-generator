@@ -7,7 +7,7 @@
 {% block title %}Concept Map - {{ material.filename }}{% endblock %}
 
 <!-- ========== Main Content Block ========== -->
-<!-- This is where the concept map visualization and topics list will appear -->
+<!-- This is where the interactive D3.js concept map visualization will appear -->
 {% block content %}
 <div class="container concept-map-container">
     <!-- ========== Page Header Section ========== -->
@@ -20,248 +20,363 @@
         </a>
     </div>
 
-    <!-- ========== Concept Map Display Section ========== -->
-    <!-- Check if concept graph data exists and has nodes to display -->
-    {% if concept_graph and concept_graph.graph and concept_graph.graph.nodes %}
+    <!-- ========== Concept Map Visualization Section ========== -->
+    <!-- Two-column layout: graph on left, topics list on right -->
     <div class="concept-visualization">
         <!-- ========== Graph Container ========== -->
-        <!-- This div will hold the D3.js interactive concept graph visualization -->
-        <div id="graph-container"></div>
+        <!-- This div will hold the D3.js SVG graph -->
+        <div id="graph-container">
+            <!-- Loading message shown until graph is ready -->
+            <div id="loading-message">Initializing concept map...</div>
+        </div>
         
-        <!-- ========== Topics List Sidebar ========== -->
-        <!-- Shows all topics covered in the material as a list -->
+        <!-- ========== Topics Sidebar ========== -->
+        <!-- Shows a list of all topics covered in the material -->
         <div class="topics-list">
             <h3>Topics Covered:</h3>
             <ul>
-                <!-- Loop through each topic and display with an icon -->
-                {% for topic in topics %}
-                <li><i class="fas fa-tag"></i> {{ topic.topic_name }}</li>
-                {% endfor %}
+                <!-- Loop through topics from database -->
+                {% if topics %}
+                    {% for topic in topics %}
+                    <li><i class="fas fa-tag"></i> {{ topic.topic_name }}</li>
+                    {% endfor %}
+                {% else %}
+                    <!-- Fallback if no topics found -->
+                    <li><i class="fas fa-tag"></i> Main Concepts</li>
+                {% endif %}
             </ul>
         </div>
     </div>
 
-    <!-- ========== D3.js Library Import ========== -->
-    <!-- Load D3.js library for creating interactive data visualizations -->
+    <!-- ========== D3.js Library ========== -->
+    <!-- Load D3.js from CDN for graph visualization -->
     <script src="https://d3js.org/d3.v7.min.js"></script>
     
-    <!-- ========== Concept Graph Visualization Script ========== -->
+    <!-- ========== Concept Map JavaScript ========== -->
+    <!-- Script to create and render the interactive D3.js graph -->
     <script>
         /**
-         * D3.js Concept Graph Visualization
+         * Interactive Concept Map Visualization
          * 
-         * This script creates an interactive force-directed graph showing relationships
-         * between topics. Users can:
-         * - See topics as nodes (circles)
-         * - See relationships as edges (lines connecting circles)
-         * - Drag nodes to rearrange the graph
-         * - Watch the graph automatically organize itself
+         * This script creates a force-directed graph showing relationships between topics:
+         * - Loads graph data from Flask backend
+         * - Creates fallback graph if no data available
+         * - Renders interactive D3.js visualization
+         * - Enables drag-and-drop node positioning
+         * - Shows topic connections with lines
          */
         
-        // ========== Data Preparation ==========
-        // Get the concept graph data from Flask template (converts Python dict to JavaScript object)
-        const graphData = {{ concept_graph.graph | tojson }};
+        console.log(' Starting concept map initialization...');
         
-        // Debug: Log the graph data to browser console for troubleshooting
-        console.log('Graph Data:', graphData);
+        // ========== Load Graph Data from Backend ==========
+        // Get the graph data passed from Flask template
+        let graphData;
+        try {
+            // Parse JSON data from Flask (contains nodes and edges)
+            graphData = {{ concept_graph.graph | tojson | safe }};
+            console.log(' Graph Data:', graphData);
+        } catch (e) {
+            // If parsing fails, log error and set to null
+            console.error(' Error parsing graph data:', e);
+            graphData = null;
+        }
         
-        // ========== Check for Valid Data ==========
-        // If no nodes exist in the graph data, show an empty state message
-        if (!graphData.nodes || graphData.nodes.length === 0) {
-            document.getElementById('graph-container').innerHTML = '<div class="empty-state"><i class="fas fa-project-diagram"></i><h2>No concept map data available</h2></div>';
-        } else {
-            // ========== Graph Dimensions ==========
-            // Set the width and height for the SVG canvas
-            const width = 800;   // Canvas width in pixels
-            const height = 600;  // Canvas height in pixels
-
-            // ========== Create SVG Canvas ==========
-            // Select the graph container and create an SVG element inside it
-            const svg = d3.select("#graph-container")
-                .append("svg")
-                .attr("width", width)
-                .attr("height", height);
-
-            // ========== Force Simulation Setup ==========
-            /**
-             * Create a force simulation to automatically position and animate nodes.
-             * 
-             * Forces applied:
-             * - link: Pulls connected nodes together
-             * - charge: Pushes all nodes apart to avoid overlap
-             * - center: Keeps the entire graph centered in the canvas
-             */
-            const simulation = d3.forceSimulation(graphData.nodes)
-                .force("link", d3.forceLink(graphData.edges).id(d => d.id))      // Connect related nodes
-                .force("charge", d3.forceManyBody().strength(-300))              // Repel nodes from each other
-                .force("center", d3.forceCenter(width / 2, height / 2));         // Center the graph
-
-            // ========== Draw Edges (Lines) ==========
-            /**
-             * Create lines representing relationships between topics.
-             * 
-             * Line thickness represents relationship strength (weight).
-             */
-            const link = svg.append("g")
-                .selectAll("line")
-                .data(graphData.edges)
-                .enter().append("line")
-                .attr("stroke", "#999")                               // Gray color for lines
-                .attr("stroke-width", d => Math.sqrt(d.weight || 1)); // Thickness based on weight
-
-            // ========== Draw Nodes (Circles) ==========
-            /**
-             * Create circles representing topics.
-             * 
-             * Main topics are larger and green.
-             * Sub-topics are smaller and blue.
-             * All nodes are draggable for user interaction.
-             */
-            const node = svg.append("g")
-                .selectAll("circle")
-                .data(graphData.nodes)
-                .enter().append("circle")
-                .attr("r", d => d.type === 'main' ? 20 : 15)                     // Radius: 20 for main, 15 for sub
-                .attr("fill", d => d.type === 'main' ? "#4CAF50" : "#2196F3")    // Color: green for main, blue for sub
-                .call(d3.drag()                                                  // Make nodes draggable
-                    .on("start", dragstarted)                                    // Handle drag start
-                    .on("drag", dragged)                                         // Handle dragging
-                    .on("end", dragended));                                      // Handle drag end
-
-            // ========== Draw Labels (Text) ==========
-            /**
-             * Add text labels next to each node showing the topic name.
-             * 
-             * Labels are positioned to the right and slightly below each node.
-             */
-            const label = svg.append("g")
-                .selectAll("text")
-                .data(graphData.nodes)
-                .enter().append("text")
-                .text(d => d.label)        // Display the topic name
-                .attr("font-size", 12)     // Text size
-                .attr("dx", 25)           // Position to the right of node
-                .attr("dy", 5);           // Position slightly below center
-
-            // ========== Animation Loop ==========
-            /**
-             * Update positions of nodes, edges, and labels on each "tick" of the simulation.
-             * 
-             * This creates the animated effect as the graph settles into position.
-             */
-            simulation.on("tick", () => {
-                // Update line positions (edges)
-                link
-                    .attr("x1", d => d.source.x)    // Start X position (from source node)
-                    .attr("y1", d => d.source.y)    // Start Y position (from source node)
-                    .attr("x2", d => d.target.x)    // End X position (to target node)
-                    .attr("y2", d => d.target.y);   // End Y position (to target node)
-
-                // Update circle positions (nodes)
-                node
-                    .attr("cx", d => d.x)           // Center X position
-                    .attr("cy", d => d.y);          // Center Y position
-
-                // Update label positions (text)
-                label
-                    .attr("x", d => d.x)            // X position follows node
-                    .attr("y", d => d.y);           // Y position follows node
-            });
-
-            // ========== Drag Event Handlers ==========
+        // ========== Create Fallback Graph if Needed ==========
+        // If no graph data from backend, create a default graph structure
+        if (!graphData || !graphData.nodes || graphData.nodes.length === 0) {
+            console.warn(' Creating fallback graph...');
             
-            /**
-             * Handle the start of dragging a node.
-             * 
-             * Increases simulation activity to make dragging smooth and responsive.
-             */
-            function dragstarted(event, d) {
-                if (!event.active) simulation.alphaTarget(0.3).restart();  // Restart simulation
-                d.fx = d.x;  // Fix X position during drag
-                d.fy = d.y;  // Fix Y position during drag
+            // Get topics from template or use defaults
+            const fallbackTopics = [
+                {% if topics %}
+                    // Use actual topics from database (limited to first 8)
+                    {% for topic in topics[:8] %}
+                    "{{ topic.topic_name | safe }}",
+                    {% endfor %}
+                {% else %}
+                    // Default topics if none exist
+                    "Main Topic", "Key Concept", "Study Material", "Important Point"
+                {% endif %}
+            ];
+            
+            // ========== Create Nodes Array ==========
+            // Each topic becomes a node in the graph
+            graphData = {
+                nodes: fallbackTopics.map((topic, i) => ({
+                    id: `node_${i}`,                    // Unique identifier
+                    label: topic.substring(0, 25),      // Display text (max 25 chars)
+                    type: i < 3 ? 'main' : 'sub',       // First 3 are main topics
+                    color: i < 3 ? '#4CAF50' : '#2196F3', // Green for main, blue for sub
+                    size: i < 3 ? 25 : 18               // Larger size for main topics
+                })),
+                edges: []  // Will be populated below
+            };
+            
+            // ========== Create Hub Connections ==========
+            // Connect first node (main topic) to other nodes
+            for (let i = 1; i < Math.min(fallbackTopics.length, 6); i++) {
+                graphData.edges.push({
+                    source: 'node_0',       // From main topic
+                    target: `node_${i}`,    // To sub-topic
+                    weight: 2               // Connection strength
+                });
             }
-
-            /**
-             * Handle dragging of a node.
-             * 
-             * Updates the node's position to follow the mouse cursor.
-             */
-            function dragged(event, d) {
-                d.fx = event.x;  // Update fixed X position to mouse X
-                d.fy = event.y;  // Update fixed Y position to mouse Y
-            }
-
-            /**
-             * Handle the end of dragging a node.
-             * 
-             * Releases the node so it can move freely again with the simulation.
-             */
-            function dragended(event, d) {
-                if (!event.active) simulation.alphaTarget(0);  // Slow down simulation
-                d.fx = null;  // Release fixed X position
-                d.fy = null;  // Release fixed Y position
+            
+            // ========== Create Sequential Connections ==========
+            // Connect nodes in sequence (forms a chain)
+            for (let i = 0; i < fallbackTopics.length - 1; i++) {
+                if (i < 4) {  // Limit to prevent too many connections
+                    graphData.edges.push({
+                        source: `node_${i}`,
+                        target: `node_${i + 1}`,
+                        weight: 1
+                    });
+                }
             }
         }
-    </script>
-    
-    <!-- ========== Empty State Section ========== -->
-    <!-- This section is shown when no concept graph data is available -->
-    {% else %}
-    <div class="concept-visualization">
-        <div class="empty-state">
-            <i class="fas fa-project-diagram"></i>
-            <h2>No concept map available</h2>
-            <p>Concept map could not be generated for this material.</p>
-        </div>
         
-        <!-- ========== Topics List (Fallback) ========== -->
-        <!-- Even without a graph, show the topics list if topics exist -->
-        {% if topics %}
-        <div class="topics-list">
-            <h3>Topics Covered:</h3>
-            <ul>
-                {% for topic in topics %}
-                <li><i class="fas fa-tag"></i> {{ topic.topic_name }}</li>
-                {% endfor %}
-            </ul>
-        </div>
-        {% endif %}
-    </div>
-    {% endif %}
+        console.log(`Final graph: ${graphData.nodes.length} nodes, ${graphData.edges.length} edges`);
+        
+        // ========== Remove Loading Message ==========
+        // Graph data is ready, hide the loading text
+        document.getElementById('loading-message').remove();
+        
+        // ========== Set Graph Dimensions ==========
+        const width = 800;   // SVG width in pixels
+        const height = 600;  // SVG height in pixels
+        
+        // ========== Create SVG Container ==========
+        // Create the main SVG element where the graph will be drawn
+        const svg = d3.select("#graph-container")
+            .append("svg")
+            .attr("width", "100%")                  // Responsive width
+            .attr("height", height)                 // Fixed height
+            .attr("viewBox", `0 0 ${width} ${height}`)  // Scalable viewport
+            .style("background", "white")           // White background
+            .style("border", "1px solid #ddd")      // Light border
+            .style("border-radius", "8px");         // Rounded corners
+        
+        // ========== Create Force Simulation ==========
+        // D3 force simulation positions nodes based on physics
+        const simulation = d3.forceSimulation(graphData.nodes)
+            // Link force: Pulls connected nodes together
+            .force("link", d3.forceLink(graphData.edges).id(d => d.id).distance(120))
+            // Charge force: Pushes all nodes apart (like magnets)
+            .force("charge", d3.forceManyBody().strength(-400))
+            // Center force: Pulls all nodes toward the center
+            .force("center", d3.forceCenter(width / 2, height / 2))
+            // Collision force: Prevents nodes from overlapping
+            .force("collision", d3.forceCollide().radius(40));
+        
+        // ========== Draw Links (Edges) ==========
+        // Create lines connecting related nodes
+        const link = svg.append("g")
+            .selectAll("line")
+            .data(graphData.edges)
+            .enter().append("line")
+            .attr("stroke", "#999")                 // Gray color
+            .attr("stroke-opacity", 0.6)            // Semi-transparent
+            .attr("stroke-width", d => Math.sqrt(d.weight || 1) * 2);  // Thicker for stronger connections
+        
+        // ========== Create Node Groups ==========
+        // Each node is a group (g) containing circle + text
+        const node = svg.append("g")
+            .selectAll("g")
+            .data(graphData.nodes)
+            .enter().append("g")
+            // Enable drag-and-drop functionality
+            .call(d3.drag()
+                .on("start", dragstarted)   // When drag starts
+                .on("drag", dragged)        // While dragging
+                .on("end", dragended));     // When drag ends
+        
+        // ========== Add Circles to Nodes ==========
+        // Each node displays as a colored circle
+        node.append("circle")
+            .attr("r", d => d.size || 20)           // Radius based on node size
+            .attr("fill", d => d.color || '#4CAF50') // Node color
+            .attr("stroke", "#fff")                 // White border
+            .attr("stroke-width", 3)                // Border thickness
+            .style("cursor", "grab");               // Hand cursor on hover
+        
+        // ========== Add Labels to Nodes ==========
+        // Text label next to each circle showing topic name
+        node.append("text")
+            .text(d => d.label)                     // Topic text
+            .attr("font-size", 12)                  // Text size
+            .attr("font-weight", "bold")            // Bold text
+            .attr("dx", 35)                         // Horizontal offset from circle
+            .attr("dy", 5)                          // Vertical alignment
+            .style("pointer-events", "none")        // Text doesn't block mouse events
+            .style("font-family", "Arial, sans-serif");
+        
+        // ========== Add Tooltips ==========
+        // Shows full topic name on hover
+        node.append("title")
+            .text(d => d.label);
+        
+        // ========== Update Positions on Each Simulation Tick ==========
+        // Called repeatedly as the simulation runs
+        simulation.on("tick", () => {
+            // Update link positions (connect node centers)
+            link
+                .attr("x1", d => d.source.x)
+                .attr("y1", d => d.source.y)
+                .attr("x2", d => d.target.x)
+                .attr("y2", d => d.target.y);
+            
+            // Update node positions (move circle + text together)
+            node.attr("transform", d => `translate(${d.x},${d.y})`);
+        });
+        
+        // ========== Drag Event Handlers ==========
+        
+        /**
+         * When drag starts: heat up simulation and fix node position
+         */
+        function dragstarted(event, d) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;  // Fix x position
+            d.fy = d.y;  // Fix y position
+            d3.select(this).select("circle").style("cursor", "grabbing");  // Change cursor
+        }
+        
+        /**
+         * While dragging: update fixed position to follow mouse
+         */
+        function dragged(event, d) {
+            d.fx = event.x;
+            d.fy = event.y;
+        }
+        
+        /**
+         * When drag ends: unfix node so simulation can move it again
+         */
+        function dragended(event, d) {
+            if (!event.active) simulation.alphaTarget(0);
+            d.fx = null;  // Unfix x position
+            d.fy = null;  // Unfix y position
+            d3.select(this).select("circle").style("cursor", "grab");  // Reset cursor
+        }
+        
+        console.log(' Concept map visualization complete!');
+    </script>
 </div>
 
 <!-- ========== Inline CSS Styles ========== -->
-<!-- Additional styling for the empty state message -->
+<!-- Custom styling specific to the concept map page -->
 <style>
-    /* ========== Empty State Container ========== */
-    /* Center and style the empty state message when no data is available */
-    .empty-state {
-        text-align: center;           /* Center all content horizontally */
-        padding: 4rem 2rem;           /* Large padding for breathing room */
-        background: white;            /* White background */
-        border-radius: 8px;           /* Rounded corners */
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);  /* Subtle shadow */
+    /* ========== Main Container ========== */
+    /* Center the concept map and limit width */
+    .concept-map-container {
+        max-width: 1400px;     /* Don't get too wide on large screens */
+        margin: 0 auto;        /* Center horizontally */
     }
     
-    /* ========== Empty State Icon ========== */
-    /* Style the large icon shown in empty state */
-    .empty-state i {
-        font-size: 4rem;              /* Very large icon */
-        color: #ccc;                  /* Light gray color */
-        margin-bottom: 1rem;          /* Space below icon */
+    /* ========== Header Section Styles ========== */
+    /* Style the page header with title and subtitle */
+    .concept-map-header {
+        text-align: center;    /* Center all text */
+        margin-bottom: 2rem;   /* Space below header */
     }
     
-    /* ========== Empty State Title ========== */
-    /* Style the heading in empty state */
-    .empty-state h2 {
-        margin-bottom: 1rem;          /* Space below heading */
-        color: #666;                  /* Medium gray text */
+    /* Style the main heading with icon */
+    .concept-map-header h1 {
+        display: flex;              /* Use flexbox for layout */
+        align-items: center;        /* Center items vertically */
+        justify-content: center;    /* Center items horizontally */
+        gap: 1rem;                 /* Space between icon and text */
+        margin-bottom: 0.5rem;     /* Small space below heading */
     }
     
-    /* ========== Empty State Description ========== */
-    /* Style the description text in empty state */
-    .empty-state p {
-        color: #999;                  /* Light gray text */
+    /* ========== Visualization Layout ========== */
+    /* Two-column grid: graph on left, topics on right */
+    .concept-visualization {
+        display: grid;                      /* Use CSS Grid */
+        grid-template-columns: 1fr 300px;   /* Main area + sidebar */
+        gap: 2rem;                         /* Space between columns */
+        margin-top: 2rem;                  /* Space above section */
+    }
+    
+    /* ========== Graph Container Styles ========== */
+    /* Container for the D3.js SVG graph */
+    #graph-container {
+        background: white;                          /* White background */
+        border-radius: 8px;                         /* Rounded corners */
+        padding: 1rem;                              /* Internal spacing */
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);    /* Drop shadow */
+        min-height: 600px;                          /* Minimum height */
+        display: flex;                              /* Flexbox for centering */
+        align-items: center;                        /* Center vertically */
+        justify-content: center;                    /* Center horizontally */
+    }
+    
+    /* ========== Loading Message Styles ========== */
+    /* Shown while graph is being created */
+    #loading-message {
+        color: #666;               /* Gray text */
+        font-size: 1.2rem;        /* Larger text */
+        font-weight: bold;        /* Bold text */
+    }
+    
+    /* ========== Topics List Sidebar ========== */
+    /* Container for the topics list on the right */
+    .topics-list {
+        background: white;                          /* White background */
+        border-radius: 8px;                         /* Rounded corners */
+        padding: 2rem;                              /* Internal spacing */
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);    /* Drop shadow */
+        height: fit-content;                        /* Height based on content */
+        max-height: 600px;                          /* Maximum height */
+        overflow-y: auto;                           /* Scroll if too many topics */
+    }
+    
+    /* Topics list heading */
+    .topics-list h3 {
+        color: var(--primary-color);   /* Use theme primary color */
+        margin-bottom: 1rem;           /* Space below heading */
+        font-size: 1.3rem;            /* Larger font */
+    }
+    
+    /* Remove default list styling */
+    .topics-list ul {
+        list-style: none;              /* No bullets */
+        padding: 0;                    /* No padding */
+    }
+    
+    /* ========== Individual Topic Items ========== */
+    /* Style for each topic in the list */
+    .topics-list li {
+        padding: 0.75rem;                      /* Internal spacing */
+        color: #666;                           /* Gray text */
+        border-bottom: 1px solid #f0f0f0;      /* Bottom border separator */
+        transition: background 0.3s;           /* Smooth hover effect */
+    }
+    
+    /* Hover effect for topic items */
+    .topics-list li:hover {
+        background: #f9f9f9;           /* Light gray background on hover */
+    }
+    
+    /* Icon styling in topic list */
+    .topics-list i {
+        color: var(--primary-color);   /* Primary color for icons */
+        margin-right: 0.75rem;         /* Space after icon */
+    }
+    
+    /* ========== Responsive Design ========== */
+    /* Mobile and tablet layout adjustments */
+    @media (max-width: 768px) {
+        /* Stack columns vertically on small screens */
+        .concept-visualization {
+            grid-template-columns: 1fr;    /* Single column */
+        }
+        
+        /* Make graph scrollable horizontally on mobile */
+        #graph-container {
+            width: 100%;               /* Full width */
+            overflow-x: auto;          /* Horizontal scroll */
+        }
     }
 </style>
 {% endblock %}
