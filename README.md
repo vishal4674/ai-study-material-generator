@@ -17,6 +17,72 @@ Build a tool that can take in study materials from different sources (PDFs, vide
 
 ---
 
+# AI Study Material Generator
+
+## Challenge 6: Multi-Source Learning Content Ingestion & Structured Output Generation
+
+### Objective
+
+Build a tool that can take in study materials from different sources (PDFs, videos, documents, transcripts) and automatically create structured learning outputs like flashcards, summaries, concept maps, and learning paths.
+
+---
+
+## Application Screenshots
+
+###  Interactive Flashcards
+![Flashcards Interface](images/screenshots/flashcard.png)
+*Auto-generated Q&A flashcards with flip animations and topic filtering - Study with personalized questions and answers*
+
+**Key Features:**
+-  **Smart Question Generation** - "What is Python?" style questions from your content
+-  **Topic-based Filtering** - Focus on specific subjects with dropdown menu
+-  **Interactive Navigation** - Previous/Next buttons and keyboard shortcuts (Arrow keys, Spacebar)
+- **Progress Tracking** - Shows current card position (1/19 format)
+-  **Flip Animation** - Smooth 3D card flip to reveal answers
+
+###  Document Summary Dashboard  
+![Summary Dashboard](images/screenshots/document_summary.png)
+*Intelligent text summarization with compression analytics and key points extraction*
+
+**Summary Features:**
+-  **Compression Analytics** - Shows 32.6% compression ratio with visual statistics
+-  **Statistics Dashboard** - Original vs summary word count comparison
+-  **Key Points Extraction** - Bullet-pointed list of most important concepts
+-  **Clean Interface** - Professional card-based layout with clear sections
+- **Reading Time Estimation** - Optimized summary length for efficient studying
+
+###  Interactive Concept Map
+![Concept Map Visualization](images/screenshots/concept-map.png)
+*D3.js powered interactive visualization showing topic relationships and connections*
+
+**Concept Map Features:**
+-  **Interactive Graph** - Drag-and-drop nodes with physics-based positioning
+-  **Visual Relationships** - Connected lines showing how topics relate to each other
+-  **Color-Coded Nodes** - Green circles (main topics) vs Blue circles (sub-topics)  
+- **Topics Sidebar** - Complete list of covered topics with tag icons
+-  **Responsive Design** - Works seamlessly on desktop and mobile devices
+-  **Zoom & Pan** - Explore large concept networks with smooth interactions
+
+---
+
+##  What Makes This Special
+
+### 1. **Complete End-to-End Solution**
+Unlike basic converters, this provides a full learning ecosystem from upload to study.
+
+### 2. **Advanced NLP Processing**  
+Uses sophisticated algorithms to extract meaningful topics and relationships automatically.
+
+### 3. **Interactive Visualizations**
+Beautiful D3.js powered concept maps that help users understand complex relationships.
+
+### 4. **Professional UI/UX**
+Clean, modern interface that makes studying enjoyable and efficient.
+
+### 5. **Multi-Format Support**
+Handles PDFs, documents, and even video files with speech recognition.
+
+
 ## Deliverables
 
 - **Web tool** for uploading and processing files
@@ -182,3 +248,5 @@ Visit [http://localhost:5000](http://localhost:5000)
 │  D3.js Visual   │    │  Study Plan     │    │   Download      │
 │concept_map.html │    │ learning_path   │    │  (JSON/CSV)     │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
+
+
