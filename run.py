@@ -13,7 +13,7 @@ if __name__ == '__main__':
     print("\n" + "="*60)
     print(" AI STUDY MATERIAL GENERATOR")
     print("="*60)
-    print("✨ Application Started Successfully!")
+    print(" Application Started Successfully!")
     print("="*60)
     print(" URLs:")
     print("   • Home Page:      http://localhost:5000")
