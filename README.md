@@ -30,6 +30,9 @@ Build a tool that can take in study materials from different sources (PDFs, vide
 ## Application Screenshots
 
 ###  Interactive Flashcards
+![Home Interface](images/screenshots/home_page.png)
+![Study material Interface](images/screenshots/study_material.png)
+![Stats Interface](images/screenshots/stats.png)
 ![Flashcards Interface](images/screenshots/flashcard.png)
 *Auto-generated Q&A flashcards with flip animations and topic filtering - Study with personalized questions and answers*
 
